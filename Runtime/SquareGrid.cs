@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 using Debug = Padoru.Diagnostics.Debug;
@@ -25,9 +26,8 @@ namespace Padoru.Grids
 
 		public T GetValue(Vector2Int gridPos)
 		{
-			if (gridPos.x < 0 || gridPos.x >= size.x || gridPos.y < 0 || gridPos.y >= size.y)
+			if (!AreCoordinatesInsideBounds(gridPos))
 			{
-				Debug.LogError($"Index out of bounds in grid for position {gridPos}. Returning default.");
 				return default;
 			}
 
@@ -40,11 +40,48 @@ namespace Padoru.Grids
 			return GetValue(gridPos);
 		}
 
+		public void GetValuesInRow(Vector2Int gridPos, List<T> values)
+		{
+			if (!AreCoordinatesInsideBounds(gridPos))
+			{
+				return;
+			}
+
+			for (int x = 0; x < size.x; x++)
+			{
+				values.Add(items[x, gridPos.y]);
+			}
+		}
+
+		public void GetValuesInRow(Vector3 worldPos, List<T> values)
+		{
+			var gridPos = WorldPositionToGridPosition(worldPos);
+			GetValuesInRow(gridPos, values);
+		}
+
+		public void GetValuesInColumn(Vector2Int gridPos, List<T> values)
+		{
+			if (!AreCoordinatesInsideBounds(gridPos))
+			{
+				return;
+			}
+
+			for (int y = 0; y < size.x; y++)
+			{
+				values.Add(items[gridPos.x, y]);
+			}
+		}
+
+		public void GetValuesInColumn(Vector3 worldPos, List<T> values)
+		{
+			var gridPos = WorldPositionToGridPosition(worldPos);
+			GetValuesInColumn(gridPos, values);
+		}
+
 		public void SetValue(Vector2Int gridPos, T value)
 		{
-			if (gridPos.x < 0 || gridPos.x >= size.x || gridPos.y < 0 || gridPos.y >= size.y)
+			if (!AreCoordinatesInsideBounds(gridPos))
 			{
-				Debug.LogError($"Index out of bounds in grid for position {gridPos}. Returning default.");
 				return;
 			}
 
@@ -105,6 +142,11 @@ namespace Padoru.Grids
 					items[x, y] = createItemCallback.Invoke();
 				}
 			}
+		}
+
+		private bool AreCoordinatesInsideBounds(Vector2Int gridPos)
+		{
+			return gridPos.x >= 0 && gridPos.x < size.x && gridPos.y >= 0 && gridPos.y < size.y;
 		}
 	}
 }
