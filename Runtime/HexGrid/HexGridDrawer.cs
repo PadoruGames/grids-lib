@@ -6,13 +6,6 @@ namespace Padoru.Grids
 {
 	public class HexGridDrawer : IGridDrawer
 	{
-		private class Cell
-		{
-			public List<Edge> edges;
-			public Vector3 center;
-			public Vector2Int coords;
-		}
-
 		private class Edge : IEquatable<Edge>
 		{
 			public Vector3 from;
@@ -26,19 +19,16 @@ namespace Padoru.Grids
 
 		private Vector3[] corners;
 		private GUIStyle coordsStyle;
-		private Vector2Int size;
-		private List<Cell> cells;
-		private List<Edge> alreadyDrawnEdges = new List<Edge>();
-		private Func<Vector2Int, Vector3> girdPositionToWorldPosition;
+		private List<Edge> edgesToDraw;
+		private List<IHexCell> cells;
 
-		public HexGridDrawer(Vector2Int size, float outerRadius, Func<Vector2Int, Vector3> girdPositionToWorldPosition)
+		public HexGridDrawer(List<IHexCell> cells, float outerRadius, float innerRadius)
 		{
-			this.size = size;
-			this.girdPositionToWorldPosition = girdPositionToWorldPosition;
+			this.cells = cells;
 
-			CreateCorners(outerRadius);
+			CreateCorners(outerRadius, innerRadius);
 
-			CreateCells();
+			CreateEdges();
 
 			coordsStyle = new GUIStyle();
 			coordsStyle.alignment = TextAnchor.MiddleCenter;
@@ -50,39 +40,21 @@ namespace Padoru.Grids
 		{
 			Gizmos.color = Color.white;
 
-			alreadyDrawnEdges.Clear();
-
-			foreach (var cell in cells)
+			foreach (var edge in edgesToDraw)
 			{
-				DrawCell(cell);
-			}
-		}
-
-		private void DrawCell(Cell cell)
-		{
-			foreach (var edge in cell.edges)
-			{
-				if (alreadyDrawnEdges.Contains(edge))
-				{
-					continue;
-				}
-
-				alreadyDrawnEdges.Add(edge);
-
 				Gizmos.DrawLine(edge.from, edge.to);
 			}
 
-			Gizmos.color = Color.white;
-
 #if UNITY_EDITOR
-			UnityEditor.Handles.Label(cell.center, $"{cell.coords.x},{cell.coords.y}", coordsStyle);
+			foreach (var cell in cells)
+			{
+				UnityEditor.Handles.Label(cell.Center, $"{cell.Coords.x},{cell.Coords.y}", coordsStyle);
+			}
 #endif
 		}
 
-		private void CreateCorners(float outerRadius)
+		private void CreateCorners(float outerRadius, float innerRadius)
 		{
-			var innerRadius = outerRadius * 0.866025404f;
-
 			corners = new Vector3[]
 			{
 				new Vector3(0f, outerRadius, 0),
@@ -94,19 +66,20 @@ namespace Padoru.Grids
 			};
 		}
 
-		private void CreateCells()
+		private void CreateEdges()
 		{
-			cells = new List<Cell>();
+			edgesToDraw = new List<Edge>();
 
-			for (int y = 0; y < size.y; y++)
+			foreach (var cell in cells)
 			{
-				for (int x = 0; x < size.x; x++)
+				var cellEdges = GetCellEdges(cell.Center);
+
+				foreach (var edge in cellEdges)
 				{
-					var cell = new Cell();
-					cell.center = girdPositionToWorldPosition(new Vector2Int(x, y));
-					cell.coords = new Vector2Int(x - y / 2, y);
-					cell.edges = GetCellEdges(cell.center);
-					cells.Add(cell);
+					if (!edgesToDraw.Contains(edge))
+					{
+						edgesToDraw.Add(edge);
+					}
 				}
 			}
 		}

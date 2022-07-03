@@ -27,10 +27,8 @@ namespace Padoru.Grids
 
 		Vector2Int WorldPositionToGridPosition(Vector3 worldPos);
 
-		Vector3 GirdPositionToWorldPosition(Vector2Int gridPos);
+		Vector3 GridPositionToWorldPosition(Vector2Int gridPos);
 
-		public Vector3 GetCellCenter(Vector2Int gridPos);
-
-		public Vector3 GetCellCenter(Vector3 worldPos);
+		Vector3 GetCellCenter(Vector3 worldPos);
 	}
 }

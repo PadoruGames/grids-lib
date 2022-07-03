@@ -6,14 +6,14 @@ namespace Padoru.Grids
 {
 	public class HexGrid<T> : IGrid<T>
 	{
-		private HexCell<T>[,] cells;
+		private Dictionary<Vector2Int, HexCell<T>> cells;
 		private Vector3 origin;
 		private Vector2Int size;
 		private float outerRadius;
 
 		private float innerRadius => outerRadius * 0.866025404f;
 		public float CellSize => outerRadius;
-		public IGridDrawer GridDrawer { get; }
+		public IGridDrawer GridDrawer { get; private set; }
 
 		public HexGrid(Vector3 origin, Vector2Int size, float cellSize, Func<T> createItemCallback)
 		{
@@ -21,9 +21,9 @@ namespace Padoru.Grids
 			this.size = size;
 			outerRadius = cellSize;
 
-			GridDrawer = new HexGridDrawer(size, outerRadius, GetCellCenter);
-
 			InitializeGrid(createItemCallback);
+
+			InitializeGridDrawer();
 		}
 
 		public T GetValue(Vector2Int gridPos)
@@ -33,7 +33,7 @@ namespace Padoru.Grids
 				return default;
 			}
 
-			return cells[gridPos.x, gridPos.y].Value;
+			return cells[gridPos].Value;
 		}
 
 		public T GetValue(Vector3 worldPos)
@@ -49,9 +49,12 @@ namespace Padoru.Grids
 				return;
 			}
 
-			for (int x = 0; x < size.x; x++)
+			foreach (var cell in cells)
 			{
-				values.Add(cells[x, gridPos.y].Value);
+				if (cell.Value.Coords.y == gridPos.y)
+				{
+					values.Add(cell.Value.Value);
+				}
 			}
 		}
 
@@ -68,9 +71,12 @@ namespace Padoru.Grids
 				return;
 			}
 
-			for (int y = 0; y < size.x; y++)
+			foreach (var cell in cells)
 			{
-				values.Add(cells[gridPos.x, y].Value);
+				if(cell.Value.Coords.x == gridPos.x)
+				{
+					values.Add(cell.Value.Value);
+				}
 			}
 		}
 
@@ -87,7 +93,7 @@ namespace Padoru.Grids
 				return;
 			}
 
-			cells[gridPos.x, gridPos.y].Value = value;
+			cells[gridPos].Value = value;
 		}
 
 		public void SetValue(Vector3 worldPos, T value)
@@ -96,17 +102,14 @@ namespace Padoru.Grids
 			SetValue(gridPos, value);
 		}
 
-		public Vector3 GirdPositionToWorldPosition(Vector2Int gridPos)
+		public Vector3 GridPositionToWorldPosition(Vector2Int gridPos)
 		{
-			Vector3 cellCenter = Vector3.zero;
-			cellCenter.x = (gridPos.x + gridPos.y * 0.5f - gridPos.y / 2) * (innerRadius * 2);
-			cellCenter.y = gridPos.y * (outerRadius * 1.5f);
-			cellCenter.z = 0f;
+			if (!AreCoordinatesInsideBounds(gridPos))
+			{
+				return Vector3.zero;
+			}
 
-			var xOffset = gridPos.y * innerRadius;
-			//cellCenter.x += xOffset;
-
-			return origin + cellCenter;
+			return cells[gridPos].Center;
 		}
 
 		public Vector2Int WorldPositionToGridPosition(Vector3 worldPos)
@@ -141,40 +144,56 @@ namespace Padoru.Grids
 			return new Vector2Int(iX, iZ);
 		}
 
-		public Vector3 GetCellCenter(Vector2Int gridPos)
-		{
-			var cellPos = GirdPositionToWorldPosition(gridPos);
-			cellPos.x += innerRadius;
-			cellPos.y += outerRadius;
-			return cellPos;
-		}
-
 		public Vector3 GetCellCenter(Vector3 worldPos)
 		{
 			var gridPos = WorldPositionToGridPosition(worldPos);
-			return GetCellCenter(gridPos);
+			return GridPositionToWorldPosition(gridPos);
 		}
 
 		private void InitializeGrid(Func<T> createItemCallback)
 		{
-			cells = new HexCell<T>[size.x, size.y];
+			cells = new Dictionary<Vector2Int, HexCell<T>>();
 
 			for (int x = 0; x < size.x; x++)
 			{
 				for (int y = 0; y < size.y; y++)
 				{
 					var cell = new HexCell<T>();
-					cell.Center = GirdPositionToWorldPosition(new Vector2Int(x, y));
+					cell.Center = CalculateCellCenter(new Vector2Int(x, y));
 					cell.Coords = new HexCoords(x - y / 2, y);
 					cell.Value = createItemCallback.Invoke();
-					cells[x, y] = cell;
+					cells.Add(new Vector2Int(cell.Coords.x, cell.Coords.y), cell);
 				}
 			}
 		}
 
+		private Vector3 CalculateCellCenter(Vector2Int gridPos)
+		{
+			Vector3 cellCenter = Vector3.zero;
+			cellCenter.x = (gridPos.x + gridPos.y * 0.5f - gridPos.y / 2) * (innerRadius * 2);
+			cellCenter.y = gridPos.y * (outerRadius * 1.5f);
+			cellCenter.z = 0f;
+
+			cellCenter.x += innerRadius;
+			cellCenter.y += outerRadius;
+
+			return origin + cellCenter;
+		}
+
 		private bool AreCoordinatesInsideBounds(Vector2Int gridPos)
 		{
-			return gridPos.x >= 0 && gridPos.x < size.x && gridPos.y >= 0 && gridPos.y < size.y;
+			return cells.ContainsKey(gridPos);
+		}
+
+		private void InitializeGridDrawer()
+		{
+			var cellsList = new List<IHexCell>();
+			foreach (var cell in cells)
+			{
+				cellsList.Add(cell.Value);
+			}
+
+			GridDrawer = new HexGridDrawer(cellsList, outerRadius, innerRadius);
 		}
 	}
 }

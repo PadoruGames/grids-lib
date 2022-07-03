@@ -2,8 +2,6 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-using Debug = Padoru.Diagnostics.Debug;
-
 namespace Padoru.Grids
 {
 	public class SquareGrid<T> : IGrid<T>
@@ -22,7 +20,7 @@ namespace Padoru.Grids
 			this.size = size;
 			CellSize = cellSize;
 
-			GridDrawer = new SquareGridDrawer(size, cellSize, GirdPositionToWorldPosition);
+			GridDrawer = new SquareGridDrawer(size, cellSize, GridPositionToWorldPosition);
 
 			InitializeGrid(createItemCallback);
 		}
@@ -105,20 +103,15 @@ namespace Padoru.Grids
 			return new Vector2Int(x, y);
 		}
 
-		public Vector3 GirdPositionToWorldPosition(Vector2Int gridPos)
+		public Vector3 GridPositionToWorldPosition(Vector2Int gridPos)
 		{
-			return origin + new Vector3(gridPos.x, gridPos.y) * CellSize;
-		}
-
-		public Vector3 GetCellCenter(Vector2Int gridPos)
-		{
-			return GirdPositionToWorldPosition(gridPos) + new Vector3(1, 1) * CellSize / 2f;
+			return origin + new Vector3(gridPos.x, gridPos.y) * CellSize + new Vector3(1, 1) * CellSize / 2f;
 		}
 
 		public Vector3 GetCellCenter(Vector3 worldPos)
 		{
 			var gridPos = WorldPositionToGridPosition(worldPos);
-			return GetCellCenter(gridPos);
+			return GridPositionToWorldPosition(gridPos);
 		}
 
 		private void InitializeGrid(Func<T> createItemCallback)

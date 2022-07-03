@@ -25,23 +25,25 @@ namespace Padoru.Grids
 		public void Draw()
 		{
 			Gizmos.color = Color.white;
+
+			var offset = new Vector3(-cellSize / 2f, -cellSize / 2f);
+
 			for (int x = 0; x < size.x; x++)
 			{
 				for (int y = 0; y < size.y; y++)
 				{
 					var cellPos = girdPositionToWorldPosition(new Vector2Int(x, y));
-					Gizmos.DrawLine(cellPos, girdPositionToWorldPosition(new Vector2Int(x + 1, y)));
-					Gizmos.DrawLine(cellPos, girdPositionToWorldPosition(new Vector2Int(x, y + 1)));
+					Gizmos.DrawLine(cellPos + offset, girdPositionToWorldPosition(new Vector2Int(x + 1, y)) + offset);
+					Gizmos.DrawLine(cellPos + offset, girdPositionToWorldPosition(new Vector2Int(x, y + 1)) + offset);
 
 #if UNITY_EDITOR
-					var cellCenter = cellPos + Vector3.one * cellSize / 2f;
-					UnityEditor.Handles.Label(cellCenter, $"{x},{y}", coordsStyle);
+					UnityEditor.Handles.Label(cellPos, $"{x},{y}", coordsStyle);
 #endif
 				}
 			}
 
-			Gizmos.DrawLine(girdPositionToWorldPosition(new Vector2Int(size.x, 0)), girdPositionToWorldPosition(new Vector2Int(size.x, size.y)));
-			Gizmos.DrawLine(girdPositionToWorldPosition(new Vector2Int(0, size.y)), girdPositionToWorldPosition(new Vector2Int(size.x, size.y)));
+			Gizmos.DrawLine(girdPositionToWorldPosition(new Vector2Int(size.x, 0)) + offset, girdPositionToWorldPosition(new Vector2Int(size.x, size.y)) + offset);
+			Gizmos.DrawLine(girdPositionToWorldPosition(new Vector2Int(0, size.y)) + offset, girdPositionToWorldPosition(new Vector2Int(size.x, size.y)) + offset);
 		}
 	}
 }
