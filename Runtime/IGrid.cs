@@ -7,6 +7,8 @@ namespace Padoru.Grids
 	{
 		float CellSize { get; }
 
+		IGridDrawer GridDrawer { get; }
+
 		T GetValue(Vector2Int gridPos);
 
 		T GetValue(Vector3 worldPos);
@@ -30,7 +32,5 @@ namespace Padoru.Grids
 		public Vector3 GetCellCenter(Vector2Int gridPos);
 
 		public Vector3 GetCellCenter(Vector3 worldPos);
-
-		void DrawGrid();
 	}
 }

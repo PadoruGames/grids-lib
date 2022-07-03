@@ -13,6 +13,7 @@ namespace Padoru.Grids
 		private Vector2Int size;
 
         public float CellSize { get; }
+		public IGridDrawer GridDrawer { get; }
 
         public SquareGrid(Vector3 origin, Vector2Int size, float cellSize, Func<T> createItemCallback)
 		{
@@ -20,6 +21,8 @@ namespace Padoru.Grids
 			this.origin = origin;
 			this.size = size;
 			CellSize = cellSize;
+
+			GridDrawer = new SquareGridDrawer(size, cellSize, GirdPositionToWorldPosition);
 
 			InitializeGrid(createItemCallback);
 		}
@@ -115,22 +118,7 @@ namespace Padoru.Grids
 		public Vector3 GetCellCenter(Vector3 worldPos)
 		{
 			var gridPos = WorldPositionToGridPosition(worldPos);
-			return GirdPositionToWorldPosition(gridPos) + new Vector3(1, 1) * CellSize / 2f;
-		}
-
-		public void DrawGrid()
-		{
-			for (int x = 0; x < size.x; x++)
-			{
-				for (int y = 0; y < size.y; y++)
-				{
-					UnityEngine.Debug.DrawLine(GirdPositionToWorldPosition(new Vector2Int(x, y)), GirdPositionToWorldPosition(new Vector2Int(x + 1, y)), Color.white, 1000f);
-					UnityEngine.Debug.DrawLine(GirdPositionToWorldPosition(new Vector2Int(x, y)), GirdPositionToWorldPosition(new Vector2Int(x, y + 1)), Color.white, 1000f);
-				}
-			}
-
-			UnityEngine.Debug.DrawLine(GirdPositionToWorldPosition(new Vector2Int(size.x, 0)), GirdPositionToWorldPosition(new Vector2Int(size.x, size.y)), Color.white, 1000f);
-			UnityEngine.Debug.DrawLine(GirdPositionToWorldPosition(new Vector2Int(0, size.y)), GirdPositionToWorldPosition(new Vector2Int(size.x, size.y)), Color.white, 1000f);
+			return GetCellCenter(gridPos);
 		}
 
 		private void InitializeGrid(Func<T> createItemCallback)
