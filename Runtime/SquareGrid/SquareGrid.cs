@@ -8,16 +8,16 @@ namespace Padoru.Grids
 	{
 		private T[,] items;
 		private Vector3 origin;
-		private Vector2Int size;
-
-        public float CellSize { get; }
+		
+		public Vector2Int Size { get; }
+		public float CellSize { get; }
 		public IGridDrawer GridDrawer { get; }
 
         public SquareGrid(Vector3 origin, Vector2Int size, float cellSize, Func<T> createItemCallback)
 		{
 			items = new T[size.x, size.y];
 			this.origin = origin;
-			this.size = size;
+			Size = size;
 			CellSize = cellSize;
 
 			GridDrawer = new SquareGridDrawer(size, cellSize, GridPositionToWorldPosition);
@@ -48,7 +48,7 @@ namespace Padoru.Grids
 				return;
 			}
 
-			for (int x = 0; x < size.x; x++)
+			for (int x = 0; x < Size.x; x++)
 			{
 				values.Add(items[x, gridPos.y]);
 			}
@@ -67,7 +67,7 @@ namespace Padoru.Grids
 				return;
 			}
 
-			for (int y = 0; y < size.x; y++)
+			for (int y = 0; y < Size.x; y++)
 			{
 				values.Add(items[gridPos.x, y]);
 			}
@@ -116,9 +116,9 @@ namespace Padoru.Grids
 
 		private void InitializeGrid(Func<T> createItemCallback)
 		{
-			for (int x = 0; x < size.x; x++)
+			for (int x = 0; x < Size.x; x++)
 			{
-				for (int y = 0; y < size.y; y++)
+				for (int y = 0; y < Size.y; y++)
 				{
 					items[x, y] = createItemCallback.Invoke();
 				}
@@ -127,7 +127,7 @@ namespace Padoru.Grids
 
 		private bool AreCoordinatesInsideBounds(Vector2Int gridPos)
 		{
-			return gridPos.x >= 0 && gridPos.x < size.x && gridPos.y >= 0 && gridPos.y < size.y;
+			return gridPos.x >= 0 && gridPos.x < Size.x && gridPos.y >= 0 && gridPos.y < Size.y;
 		}
 	}
 }

@@ -5,6 +5,8 @@ namespace Padoru.Grids
 {
 	public interface IGrid<T>
 	{
+		Vector2Int Size { get; }
+		
 		float CellSize { get; }
 
 		IGridDrawer GridDrawer { get; }

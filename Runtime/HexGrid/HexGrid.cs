@@ -8,17 +8,17 @@ namespace Padoru.Grids
 	{
 		private Dictionary<Vector2Int, HexCell<T>> cells;
 		private Vector3 origin;
-		private Vector2Int size;
 		private float outerRadius;
 
 		private float innerRadius => outerRadius * 0.866025404f;
 		public float CellSize => outerRadius;
 		public IGridDrawer GridDrawer { get; private set; }
+		public Vector2Int Size { get; }
 
 		public HexGrid(Vector3 origin, Vector2Int size, float cellSize, Func<T> createItemCallback)
 		{
 			this.origin = origin;
-			this.size = size;
+			Size = size;
 			outerRadius = cellSize;
 
 			InitializeGrid(createItemCallback);
@@ -154,9 +154,9 @@ namespace Padoru.Grids
 		{
 			cells = new Dictionary<Vector2Int, HexCell<T>>();
 
-			for (int x = 0; x < size.x; x++)
+			for (int x = 0; x < Size.x; x++)
 			{
-				for (int y = 0; y < size.y; y++)
+				for (int y = 0; y < Size.y; y++)
 				{
 					var cell = new HexCell<T>();
 					cell.Center = CalculateCellCenter(new Vector2Int(x, y));
