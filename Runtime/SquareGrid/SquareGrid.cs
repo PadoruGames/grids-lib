@@ -1,26 +1,34 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.TextCore.Text;
 
 namespace Padoru.Grids
 {
 	public class SquareGrid<T> : IGrid<T>
 	{
-		private T[,] items;
-		private Vector3 origin;
+		private readonly T[,] items;
+		private readonly Vector3 origin;
+		private readonly Vector3 gridForward;
+		private readonly Vector3 gridRight;
+		private readonly Vector3 gridOffset;
 		
 		public Vector2Int Size { get; }
 		public float CellSize { get; }
 		public IGridDrawer GridDrawer { get; }
 
-        public SquareGrid(Vector3 origin, Vector2Int size, float cellSize, Func<T> createItemCallback)
+        public SquareGrid(Vector3 origin, Vector3 gridForward, Vector3 gridRight, Vector2Int size, float cellSize, Func<Vector2Int, T> createItemCallback)
 		{
 			items = new T[size.x, size.y];
 			this.origin = origin;
+			this.gridForward = gridForward;
+			this.gridRight = gridRight;
 			Size = size;
 			CellSize = cellSize;
 
-			GridDrawer = new SquareGridDrawer(size, cellSize, GridPositionToWorldPosition);
+			gridOffset = (gridRight + gridForward) * CellSize / 2f;
+			
+			GridDrawer = new SquareGridDrawer(size, gridOffset, cellSize, GridPositionToWorldPosition);
 
 			InitializeGrid(createItemCallback);
 		}
@@ -104,8 +112,16 @@ namespace Padoru.Grids
 		}
 
 		public Vector3 GridPositionToWorldPosition(Vector2Int gridPos)
-		{
-			return origin + new Vector3(gridPos.x, gridPos.y) * CellSize + new Vector3(1, 1) * CellSize / 2f;
+		{	
+			//return origin + new Vector3(gridPos.x, gridPos.y) * CellSize + new Vector3(1, 1) * CellSize / 2f;
+			
+			//Debug.LogError($"GridUp: {gridUp} | Right: {right} | Forward: {forward}");
+			var cellCoordinates = gridRight * gridPos.x + gridForward * gridPos.y;
+			var cellPos = cellCoordinates * CellSize;
+			
+			//Debug.LogError($"CellCoords: {cellCoordinates} | CellPos: {cellPos} | CellOffset{offset}");
+			
+			return origin + cellPos + gridOffset;
 		}
 
 		public Vector3 GetCellCenter(Vector3 worldPos)
@@ -114,19 +130,20 @@ namespace Padoru.Grids
 			return GridPositionToWorldPosition(gridPos);
 		}
 
-		private void InitializeGrid(Func<T> createItemCallback)
+		private void InitializeGrid(Func<Vector2Int, T> createItemCallback)
 		{
 			for (int x = 0; x < Size.x; x++)
 			{
 				for (int y = 0; y < Size.y; y++)
 				{
-					items[x, y] = createItemCallback.Invoke();
+					items[x, y] = createItemCallback.Invoke(new Vector2Int(x, y));
 				}
 			}
 		}
 
 		private bool AreCoordinatesInsideBounds(Vector2Int gridPos)
 		{
+			// TODO: This does not take the origin into account
 			return gridPos.x >= 0 && gridPos.x < Size.x && gridPos.y >= 0 && gridPos.y < Size.y;
 		}
 	}
