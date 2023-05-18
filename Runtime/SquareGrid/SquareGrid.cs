@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.TextCore.Text;
+using Debug = Padoru.Diagnostics.Debug;
 
 namespace Padoru.Grids
 {
@@ -105,21 +106,19 @@ namespace Padoru.Grids
 
 		public Vector2Int WorldPositionToGridPosition(Vector3 worldPos)
 		{
-			var x = Mathf.FloorToInt((worldPos.x - origin.x) / CellSize);
-			var y = Mathf.FloorToInt((worldPos.y - origin.y) / CellSize);
-
-			return new Vector2Int(x, y);
+			var displacement = worldPos - origin;
+			var forwardDot = Vector3.Dot(displacement, gridForward);
+			var rightDot = Vector3.Dot(displacement, gridRight);
+			var forwardCoordinate = (int)(forwardDot / CellSize);
+			var rightCoordinate = (int)(rightDot / CellSize);
+			
+			return new Vector2Int(rightCoordinate, forwardCoordinate);
 		}
 
 		public Vector3 GridPositionToWorldPosition(Vector2Int gridPos)
 		{	
-			//return origin + new Vector3(gridPos.x, gridPos.y) * CellSize + new Vector3(1, 1) * CellSize / 2f;
-			
-			//Debug.LogError($"GridUp: {gridUp} | Right: {right} | Forward: {forward}");
 			var cellCoordinates = gridRight * gridPos.x + gridForward * gridPos.y;
 			var cellPos = cellCoordinates * CellSize;
-			
-			//Debug.LogError($"CellCoords: {cellCoordinates} | CellPos: {cellPos} | CellOffset{offset}");
 			
 			return origin + cellPos + gridOffset;
 		}
@@ -143,7 +142,6 @@ namespace Padoru.Grids
 
 		private bool AreCoordinatesInsideBounds(Vector2Int gridPos)
 		{
-			// TODO: This does not take the origin into account
 			return gridPos.x >= 0 && gridPos.x < Size.x && gridPos.y >= 0 && gridPos.y < Size.y;
 		}
 	}
