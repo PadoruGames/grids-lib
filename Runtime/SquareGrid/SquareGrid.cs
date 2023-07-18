@@ -88,6 +88,30 @@ namespace Padoru.Grids
 			GetValuesInColumn(gridPos, values);
 		}
 
+		public void GetValuesInRadius(Vector2Int gridPos, Vector2Int size, List<T> values)
+		{
+			if (!AreCoordinatesInsideBounds(gridPos))
+			{
+				return;
+			}
+
+			var halfSize = size / 2;
+			var min = gridPos - halfSize;
+			var max = gridPos + halfSize;
+			for (int x = min.x; x <= max.x; x++)
+			{
+				for (int y = min.y; y <= max.y; y++)
+				{
+					if (!AreCoordinatesInsideBounds(new Vector2Int(x, y)))
+					{
+						continue;
+					}
+					
+					values.Add(items[x, y]);
+				}
+			}
+		}
+
 		public void SetValue(Vector2Int gridPos, T value)
 		{
 			if (!AreCoordinatesInsideBounds(gridPos))

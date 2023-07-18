@@ -22,6 +22,8 @@ namespace Padoru.Grids
 		void GetValuesInColumn(Vector2Int gridPos, List<T> values);
 		 
 		void GetValuesInColumn(Vector3 worldPos, List<T> values);
+		
+		void GetValuesInRadius(Vector2Int gridPos, Vector2Int size, List<T> values);
 
 		void SetValue(Vector2Int gridPos, T value);
 

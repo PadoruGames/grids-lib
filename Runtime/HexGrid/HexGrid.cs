@@ -86,6 +86,11 @@ namespace Padoru.Grids
 			GetValuesInColumn(gridPos, values);
 		}
 
+		public void GetValuesInRadius(Vector2Int gridPos, Vector2Int size, List<T> values)
+		{
+			throw new NotImplementedException();
+		}
+
 		public void SetValue(Vector2Int gridPos, T value)
 		{
 			if (!AreCoordinatesInsideBounds(gridPos))
