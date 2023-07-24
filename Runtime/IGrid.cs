@@ -5,6 +5,8 @@ namespace Padoru.Grids
 {
 	public interface IGrid<T>
 	{
+		T this[int x, int y] { get; }
+		
 		Vector2Int Size { get; }
 		
 		float CellSize { get; }
@@ -24,6 +26,8 @@ namespace Padoru.Grids
 		void GetValuesInColumn(Vector3 worldPos, List<T> values);
 		
 		void GetValuesInRadius(Vector2Int gridPos, Vector2Int size, List<T> values);
+		
+		void GetEdgeCellPositions(List<Vector3> positions);
 
 		void SetValue(Vector2Int gridPos, T value);
 

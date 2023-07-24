@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.TextCore.Text;
 using Debug = Padoru.Diagnostics.Debug;
 
 namespace Padoru.Grids
@@ -14,6 +13,7 @@ namespace Padoru.Grids
 		private readonly Vector3 gridRight;
 		private readonly Vector3 gridOffset;
 		
+		public T this[int x, int y] => items[x, y];
 		public Vector2Int Size { get; }
 		public float CellSize { get; }
 		public IGridDrawer GridDrawer { get; }
@@ -112,6 +112,23 @@ namespace Padoru.Grids
 			}
 		}
 
+		public void GetEdgeCellPositions(List<Vector3> positions)
+		{
+			for (int x = 0; x < items.GetLength(0); x++)
+			{
+				for (int y = 0; y < items.GetLength(1); y++)
+				{
+					var coords = new Vector2Int(x, y);
+					
+					if (AreCoordinatesAnEdge(coords))
+					{
+						var worldPos = GridPositionToWorldPosition(coords);
+						positions.Add(worldPos);
+					}
+				}
+			}
+		}
+
 		public void SetValue(Vector2Int gridPos, T value)
 		{
 			if (!AreCoordinatesInsideBounds(gridPos))
@@ -167,6 +184,11 @@ namespace Padoru.Grids
 		private bool AreCoordinatesInsideBounds(Vector2Int gridPos)
 		{
 			return gridPos.x >= 0 && gridPos.x < Size.x && gridPos.y >= 0 && gridPos.y < Size.y;
+		}
+
+		private bool AreCoordinatesAnEdge(Vector2Int gridPos)
+		{
+			return gridPos.x == 0 || gridPos.x == Size.x - 1 || gridPos.y == 0 || gridPos.y == Size.y - 1;
 		}
 	}
 }

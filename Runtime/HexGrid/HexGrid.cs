@@ -9,7 +9,8 @@ namespace Padoru.Grids
 		private Dictionary<Vector2Int, HexCell<T>> cells;
 		private Vector3 origin;
 		private float outerRadius;
-
+		
+		public T this[int x, int y] => GetValue(new Vector2Int(x, y));
 		private float innerRadius => outerRadius * 0.866025404f;
 		public float CellSize => outerRadius;
 		public IGridDrawer GridDrawer { get; private set; }
@@ -87,6 +88,11 @@ namespace Padoru.Grids
 		}
 
 		public void GetValuesInRadius(Vector2Int gridPos, Vector2Int size, List<T> values)
+		{
+			throw new NotImplementedException();
+		}
+
+		public void GetEdgeCellPositions(List<Vector3> positions)
 		{
 			throw new NotImplementedException();
 		}

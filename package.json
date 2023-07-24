@@ -1,6 +1,6 @@
 {
   "name": "com.padoru.grids-lib",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "displayName": "Padoru Grids",
   "description": "A library to handle grids in Unity games",
   "unity": "2020.3"
